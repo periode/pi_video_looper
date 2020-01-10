@@ -167,7 +167,6 @@ class VideoLooper(object):
                         if self._is_number(sound_vol_string):
                             self._sound_vol = int(float(sound_vol_string))
         # Create a playlist with the sorted list of movies.
-        print(movies)
         return Playlist(sorted(movies), self._is_random)
 
     def _blank_screen(self):
@@ -213,7 +212,7 @@ class VideoLooper(object):
             # Pause for a second between each frame.
             time.sleep(1)
 
-    def _idle_message(self):
+    def _idle_message(self, playlist):
         """Print idle message from file reader."""
         # Print message to console.
         message = self._reader.idle_message()

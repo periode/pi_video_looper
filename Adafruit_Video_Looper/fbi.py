@@ -28,25 +28,12 @@ class Fbi:
         return self._temp_directory
 
     def _load_config(self, config):
-        self._extensions = config.get('fbi', 'extensions').split(',')
-        print("fbi found extensions %s" % self._extensions)
-        #                         .translate(str.maketrans('', '', ' \t\r\n.')) \
-        #                         .split(',')
+        self._extensions = map(str.strip, config.get('fbi', 'extensions').split(','))
+        #self._extensions = config.get('fbi', 'extensions') \
+                                #.translate(None, '\t\r\n.') \
+                                #.split(',')
         self._extra_args = config.get('fbi', 'extra_args').split()
         self._display_duration = config.get('fbi', 'display_duration')
-        #self._sound = config.get('omxplayer', 'sound').lower()
-        #assert self._sound in ('hdmi', 'local', 'both'), 'Unknown omxplayer sound configuration value: {0} Expected hdmi, local, or both.'.format(self._sound)
-        #self._show_titles = config.getboolean('omxplayer', 'show_titles')
-        
-        #if self._show_titles:
-        #    title_duration = config.getint('omxplayer', 'title_duration')
-        #    if title_duration >= 0:
-        #        m, s = divmod(title_duration, 60)
-        #        h, m = divmod(m, 60)
-        #        self._subtitle_header = '00:00:00,00 --> {:d}:{:02d}:{:02d},00\n'.format(h, m, s)
-        #    else:
-        #        self._subtitle_header = '00:00:00,00 --> 99:59:59,00\n'
-        
 
     def supported_extensions(self):
         """Return list of supported file extensions."""
@@ -60,19 +47,9 @@ class Fbi:
         #args.extend(['-o', self._sound])  # Add sound arguments.
         args.extend(self._extra_args)     # Add extra arguments from config.
         args.extend(['-t', self._display_duration]) # display time for each image
-        #if vol is not 0:
-        #    args.extend(['--vol', str(vol)])
-        #if loop is None:
-        #    loop = image.repeats
-        #if loop <= -1:
-        #    args.append('--loop')  # Add loop parameter if necessary.
-        #if self._show_titles and image.title:
-        #    srt_path = os.path.join(self._get_temp_directory(), 'video_looper.srt')
-        #    with open(srt_path, 'w') as f:
-        #        f.write(self._subtitle_header)
-        #        f.write(image.title)
-        #    args.extend(['--subtitles', srt_path])
-        args.append(' '.join(images))       # Add movie file path.
+        args.extend(images)       # Add movie file path.
+
+        print("final args: %s" % ' '.join(args))
         # Run fbi process and direct standard output to /dev/null.
         self._process = subprocess.Popen(args,
                                          stdout=open(os.devnull, 'wb'),
@@ -80,13 +57,10 @@ class Fbi:
 
     def is_playing(self):
         """Return true if the video player is running, false otherwise."""
-
         if self._process is None:
             return False
-
-        return True
-        self._process.poll()
-        return self._process.returncode is None
+        else:
+            return True
 
     def stop(self, block_timeout_sec=0):
         """Stop the video player.  block_timeout_sec is how many seconds to
@@ -113,5 +87,5 @@ class Fbi:
 
 
 def create_player(config):
-    """Create new video player based on omxplayer."""
+    """Create new video player based on fbi."""
     return Fbi(config)
