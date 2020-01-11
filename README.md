@@ -6,9 +6,9 @@ Easy to use out of the box but also has a lot of settings to make it fit your us
 
 If you miss a feature just post an issue on github. (https://github.com/adafruit/pi_video_looper)
 
-# THIS VERSION SUPPORTS AUDIO PLAYBACK (.wav, .mp3) AS WELL AS IMAGES SLIDESHOWS (.jpg, .jpeg, .bmp, .png)
+### THIS FORK SUPPORTS AUDIO PLAYBACK (.wav, .mp3) AS WELL AS IMAGES SLIDESHOWS (.jpg, .jpeg, .bmp, .png)
 
-The slideshow works by creating a single video with `ffmpeg` and loops it with `omxplayer`
+The slideshow works by creating a single video with `ffmpeg` and loops it with `omxplayer`. More details in `video_looper.ini` and `Adafruit_Video_Looper/ffmpeg.py`.
 
 ## Changelog
 
