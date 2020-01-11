@@ -106,22 +106,21 @@ class VideoLooper(object):
                     files.append(extension)
 
             for f in files:
-                #this is where i check if any of the omxplayer formats are here and the i load omxplayer
                 if re.match("\w*(\.mp4|\.avi|\.mov|\.mkv|\.mp3|\.wav)", f):
                     return "omxplayer"
 
             for f in files:
-                 #if we havent found a video/audio, we check for images and then i load fbi
-                if re.match("\w*(\.jpg|\.png)", f):
-                    return "fbi"
+                if re.match("\w*(\.jpg|\.png|\.jpeg|\.bmp)", f):
+                    return "ffmpeg"
 
             print("Found no compatible media, defaulting to omxplayer") 
             return "omxplayer"
 
-    def _load_player(self, player):
+    def _load_player(self, module="omxplayer"):
         """Load the configured video player and return an instance of it."""
         #module = self._config.get('video_looper', 'video_player')
-        module = player
+        if module is None:
+            module = "omxplayer"
         print("Loading module: %s" % module)
         return importlib.import_module('.' + module, 'Adafruit_Video_Looper') \
             .create_player(self._config)
@@ -188,7 +187,7 @@ class VideoLooper(object):
         message if the on screen display is enabled.
         """
         # Print message to console with number of movies in playlist.
-        message = 'Found {0} movie{1}.'.format(playlist.length(), 
+        message = 'Found {0} file{1}.'.format(playlist.length(), 
             's' if playlist.length() >= 2 else '')
         self._print(message)
         # Do nothing else if the OSD is turned off.
@@ -212,10 +211,11 @@ class VideoLooper(object):
             # Pause for a second between each frame.
             time.sleep(1)
 
-    def _idle_message(self, playlist):
+    def _idle_message(self, message=None):
         """Print idle message from file reader."""
         # Print message to console.
-        message = self._reader.idle_message()
+        if message is None:
+            message = self._reader.idle_message()
         self._print(message)
         # Do nothing else if the OSD is turned off.
         if not self._osd:
@@ -236,7 +236,7 @@ class VideoLooper(object):
             self._animate_countdown(playlist)
             self._blank_screen()
         else:
-            self._idle_message()
+            self._idle_message("Please insert a USB drive.")
 
     def run(self):
         """Main program loop.  Will never return!"""
@@ -249,18 +249,30 @@ class VideoLooper(object):
             if not self._player.is_playing():
                 if self._module is "omxplayer":
                     movie = playlist.get_next()
-                elif self._module is "fbi":
+                elif self._module is "fbi" or "ffmpeg":
                     movie = playlist.get_all()
-
-                if movie is not None:
+                
+                if movie is not None and playlist.length() > 0:
                     # Start playing the first available movie.
-                    self._print('Playing movie: {0}'.format(movie))
+                    # self._print('Playing movie: {0}'.format(movie))
+                    if self._module is "ffmpeg":
+                        self._idle_message("Rendering slideshow...")
                     self._player.play(movie, loop=playlist.length() == 1, vol = self._sound_vol)
             # Check for changes in the file search path (like USB drives added)
             # and rebuild the playlist.
             if self._reader.is_changed():
+                self._blank_screen()
                 self._player.stop(3)  # Up to 3 second delay waiting for old 
                                       # player to stop.
+
+                # if the files have changed, we check if we need to change the player as well
+                if self._module == self._assess_media_type():
+                    continue
+                else:
+                    self._module = self._assess_media_type()
+                    self._player = self._load_player(self._module)
+                    self._extensions = self._player.supported_extensions()
+
                 # Rebuild playlist and show countdown again (if OSD enabled).
                 playlist = self._build_playlist()
                 self._prepare_to_run_playlist(playlist)
