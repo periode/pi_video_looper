@@ -52,6 +52,11 @@ cp ./assets/video_looper.conf /etc/supervisor/conf.d/
 
 service supervisor restart
 
+echo "Setting up daily autoshutdown"
+echo "============================="
+
+(crontab -l ; echo "55 1 * * * sudo shutdown -h") | crontab -
+
 if grep gpu_mem /boot/config.txt; then
   echo "Not changing GPU memory since it's already set"
 else
