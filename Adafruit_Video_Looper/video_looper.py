@@ -1,7 +1,7 @@
 # Copyright 2015 Adafruit Industries.
 # Author: Tony DiCola
 # License: GNU GPLv2, see LICENSE.txt
-import ConfigParser
+import configparser
 import importlib
 import os
 import re
@@ -11,7 +11,7 @@ import time
 
 import pygame
 
-from model import Playlist
+from .model import Playlist
 
 
 # Basic video looper architecure:
@@ -44,7 +44,7 @@ class VideoLooper(object):
         pass path to a valid video looper ini configuration file.
         """
         # Load the configuration.
-        self._config = ConfigParser.SafeConfigParser()
+        self._config = configparser.SafeConfigParser()
         if len(self._config.read(config_path)) == 0:
             raise RuntimeError('Failed to find configuration file at {0}, is the application properly installed?'.format(config_path))
         self._console_output = self._config.getboolean('video_looper', 'console_output')
@@ -57,12 +57,8 @@ class VideoLooper(object):
         self._is_random = self._config.getboolean('video_looper', 'is_random')
         # Parse string of 3 comma separated values like "255, 255, 255" into 
         # list of ints for colors.
-        self._bgcolor = map(int, self._config.get('video_looper', 'bgcolor') \
-                                             .translate(None, ',') \
-                                             .split())
-        self._fgcolor = map(int, self._config.get('video_looper', 'fgcolor') \
-                                             .translate(None, ',') \
-                                             .split())
+        self._bgcolor = (0, 0, 0)
+        self._fgcolor = (255, 255, 255)
         # Load sound volume file name value
         self._sound_vol_file = self._config.get('omxplayer', 'sound_vol_file');
         # default value to 0 millibels (omxplayer)
