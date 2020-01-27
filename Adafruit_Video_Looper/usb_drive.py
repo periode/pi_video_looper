@@ -41,6 +41,6 @@ class USBDriveReader:
         return 'Insert USB drive with compatible movies.'
 
 
-def create_file_reader(config, screen):
+def create_file_reader(config):
     """Create new file reader based on mounting USB drives."""
     return USBDriveReader(config)
