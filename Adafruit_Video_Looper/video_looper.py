@@ -44,7 +44,7 @@ class VideoLooper(object):
         pass path to a valid video looper ini configuration file.
         """
         # Load the configuration.
-        self._config = configparser.SafeConfigParser()
+        self._config = configparser.ConfigParser()
         if len(self._config.read(config_path)) == 0:
             raise RuntimeError('Failed to find configuration file at {0}, is the application properly installed?'.format(config_path))
         self._console_output = self._config.getboolean('video_looper', 'console_output')
